@@ -2,36 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public enum Direction
+{
+    Up,
+    Down,
+    Left,
+    Right
+}
+
 public class block : MonoBehaviour
 {
     private SpriteRenderer SpriteRenderer;
     public Sprite[] sprites;
-    public float speed = 10f;
-    private Rigidbody2D rigidbody2D;
-    private bool Up;
-    private bool Down;
-    private bool Left;
-    private bool Right;
-    // Start is called before the first frame update
+    public float speed;
+
+
     void Start()
     {
         sprites = Resources.LoadAll<Sprite>("image");
         SpriteRenderer = GetComponent<SpriteRenderer>();
-        rigidbody2D = GetComponent<Rigidbody2D>();
-        //SpriteRenderer.sprite=sprites[Random.Range(0,sprites.Length)];
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        Up = Input.GetButtonDown("Up");
-        Down = Input.GetButtonDown("Down");
-        Left = Input.GetButtonDown("Left");
-        Right = Input.GetButtonDown("Right");
-    }
-    void FixedUpdate()
-    {
-        MoveBlock();
+        MoveToTarget(new Vector3(0, 0, 0));
     }
 
     public void SetSprite(int index)
@@ -39,23 +35,28 @@ public class block : MonoBehaviour
         SpriteRenderer.sprite = sprites[index];
     }
 
-    void MoveBlock()
+    void MoveToTarget(Vector3 target)
     {
-        if (Up)
+        transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
+    }
+    void MoveBlock(Direction direction)
+    {
+        switch (direction)
         {
-            rigidbody2D.velocity=new Vector2(0,speed);
-        }
-        if (Down)
-        {
-            rigidbody2D.velocity=new Vector2(0,-speed);
-        }
-        if (Left)
-        {
-            rigidbody2D.velocity=new Vector2(-speed,0);
-        }
-        if (Right)
-        {
-            rigidbody2D.velocity=new Vector2(speed,0);
+            case Direction.Up:
+                transform.position += Vector3.up * speed * Time.deltaTime;
+                break;
+            case Direction.Down:
+                transform.position += Vector3.down * speed * Time.deltaTime;
+                break;
+            case Direction.Left:
+                transform.position += Vector3.left * speed * Time.deltaTime;
+                break;
+            case Direction.Right:
+                transform.position += Vector3.right * speed * Time.deltaTime;
+                break;
+            default:
+                break;
         }
     }
 }

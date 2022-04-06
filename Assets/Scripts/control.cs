@@ -5,16 +5,22 @@ using UnityEngine;
 public class control : MonoBehaviour
 {
     public block[] blocks;
-    // Start is called before the first frame update
+    private bool Up;
+    private bool Down;
+    private bool Left;
+    private bool Right;
+
     void Start()
     {
-        // blocks = new block[16];
-
+        Up = Input.GetButtonDown("Up");
+        Down = Input.GetButtonDown("Down");
+        Left = Input.GetButtonDown("Left");
+        Right = Input.GetButtonDown("Right");
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-       
+
     }
 }
