@@ -54,7 +54,7 @@ public class control : MonoBehaviour
             y = UnityEngine.Random.Range(0, 4);
         }
         blocks[x, y] = Instantiate(block, positions[x, y], Quaternion.identity);
-        blocks[x,y].gameObject.name = "block" + x + y;
+        blocks[x, y].gameObject.name = "block" + x + y;
         blocks[x, y].number = initialNumRange[UnityEngine.Random.Range(0, initialNumRange.Length)];
     }
     //判断是否满了
@@ -72,7 +72,7 @@ public class control : MonoBehaviour
         }
         return true;
     }
-    //判断是否可以移动
+    //判断是否可以移动,true可以移动，false不可以移动
     private bool AroundIsNull(int x, int y, Direction direction)
     {
         if (x < 0 || x > 3 || y < 0 || y > 3)
@@ -120,6 +120,43 @@ public class control : MonoBehaviour
         }
         return false;
     }
+    //判断移动位置
+    private void MovePosition(int x, int y, Direction direction, out int newX, out int newY, out bool isSameNum)
+    {
+        if (x < 0 || x > 3 || y < 0 || y > 3)
+        {
+            throw new Exception("超出范围");
+        }
+        if (blocks[x, y] == null)
+        {
+            throw new Exception("本身为空");
+        }
+        newX = 0;//新的x坐标
+        newY = 0;//新的y坐标
+        isSameNum = false;//此方向方块是否相同
+        switch (direction)
+        {
+            case Direction.Up:
+                newX = x;
+                if(y == 0)
+                {
+                    break;
+                }
+                for (int i = 1; i <= y; i++)
+                {
+                    if(blocks[x,y-i]==null&&(y-i-1<0||blocks[x,y-i-1]!=null))
+                    {
+                        newY = y - i;
+                        if(blocks[x,y-i-1]!=null&&blocks[x,y-i-1]==blocks[x,y])
+                        {
+                            isSameNum = true;
+                        }
+                        break;
+                    }
+                }
+                break;
+        }        
+    }
     //移动方块
     private void MoveBlock()
     {
@@ -133,16 +170,23 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
-                    if (AroundIsNull(i, j, Direction.Up))
-                    {
-                        blocks[i, j].target = positions[i, j - 1];
-                        blocks[i, j - 1] = Instantiate(blocks[i, j], positions[i, j - 1], Quaternion.identity);
-                        blocks[i, j - 1].gameObject.name = "block" + i + (j - 1);
-                        blocks[i, j - 1].number = blocks[i, j].number;
-                        //blocks[i, j-1] = blocks[i, j].Clone() as block;
-                        Destroy(blocks[i, j].gameObject);
+                    // if (AroundIsNull(i, j, Direction.Up))
+                    // {
+                    //     blocks[i, j].target = positions[i, j - 1];
+                    //     blocks[i, j - 1] = Instantiate(blocks[i, j], positions[i, j - 1], Quaternion.identity);
+                    //     blocks[i, j - 1].gameObject.name = "block" + i + (j - 1);
+                    //     blocks[i, j - 1].number = blocks[i, j].number;
+                    //     //blocks[i, j-1] = blocks[i, j].Clone() as block;
+                    //     Destroy(blocks[i, j].gameObject);
+                    // }
 
-                    }
+                    int newX = 0;
+                    int newY = 0;
+                    bool isSameNum = false;
+                    MovePosition(i, j, Direction.Up, out newX, out newY, out isSameNum);
+                    blocks[i, j].target = positions[newX, newY];
+
+
                 }
             }
         }
