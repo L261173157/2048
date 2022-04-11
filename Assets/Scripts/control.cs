@@ -26,7 +26,7 @@ public class control : MonoBehaviour
 
     void Update()
     {
-        Up = Input.GetButtonDown("Up");
+        Up = Input.GetButton("Up");
         Down = Input.GetButtonDown("Down");
         Left = Input.GetButtonDown("Left");
         Right = Input.GetButtonDown("Right");
@@ -138,16 +138,17 @@ public class control : MonoBehaviour
         {
             case Direction.Up:
                 newX = x;
-                if(y == 0)
+                for (int i = 0; i <= y; i++)
                 {
-                    break;
-                }
-                for (int i = 1; i <= y; i++)
-                {
-                    if(blocks[x,y-i]==null&&(y-i-1<0||blocks[x,y-i-1]!=null))
+                    if (y - i - 1 < 0)
                     {
                         newY = y - i;
-                        if(blocks[x,y-i-1]!=null&&blocks[x,y-i-1]==blocks[x,y])
+                        break;
+                    }
+                    if (blocks[x, y - i - 1] != null)
+                    {
+                        newY = y - i;
+                        if (blocks[x, y - i - 1].number == blocks[x, y].number)
                         {
                             isSameNum = true;
                         }
@@ -155,7 +156,7 @@ public class control : MonoBehaviour
                     }
                 }
                 break;
-        }        
+        }
     }
     //移动方块
     private void MoveBlock()
@@ -170,23 +171,18 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
-                    // if (AroundIsNull(i, j, Direction.Up))
-                    // {
-                    //     blocks[i, j].target = positions[i, j - 1];
-                    //     blocks[i, j - 1] = Instantiate(blocks[i, j], positions[i, j - 1], Quaternion.identity);
-                    //     blocks[i, j - 1].gameObject.name = "block" + i + (j - 1);
-                    //     blocks[i, j - 1].number = blocks[i, j].number;
-                    //     //blocks[i, j-1] = blocks[i, j].Clone() as block;
-                    //     Destroy(blocks[i, j].gameObject);
-                    // }
-
-                    int newX = 0;
-                    int newY = 0;
-                    bool isSameNum = false;
-                    MovePosition(i, j, Direction.Up, out newX, out newY, out isSameNum);
-                    blocks[i, j].target = positions[newX, newY];
-
-
+                    MovePosition(i, j, Direction.Up, out int newX, out int newY, out bool isSameNum);
+                    blocks[i, j].target = positions[newX, newY];//实现动画
+                    blocks[newX,newY]=Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                    blocks[newX, newY].gameObject.name = "block" + newX + newY;
+                    blocks[newX, newY].number = blocks[i, j].number;
+                    Destroy(blocks[i, j].gameObject);
+                    //StartCoroutine(blocks[i,j].MoveToTargetIE(positions[newX, newY]));
+                    if (isSameNum)
+                    {
+                        blocks[newX, newY - 1].number *= 2;
+                        //Destroy(blocks[newX, newY].gameObject);
+                    }
                 }
             }
         }

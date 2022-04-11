@@ -106,6 +106,11 @@ public class block : MonoBehaviour, ICloneable
     {
         transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
     }
+    public IEnumerator MoveToTargetIE(Vector3 target)
+    {
+        transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
+        yield return null;
+    }
     //按指定方向移动
     private void MoveBlock(Direction direction)
     {
