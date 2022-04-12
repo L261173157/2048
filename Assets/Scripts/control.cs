@@ -8,7 +8,7 @@ public class control : MonoBehaviour
     public block block;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] { 2, 4 };
+    private int[] initialNumRange = new int[] {2, 4};
     private bool Up;
     private bool Down;
     private bool Left;
@@ -191,18 +191,24 @@ public class control : MonoBehaviour
                     }
 
                     MovePosition(i, j, Direction.Up, out int newX, out int newY, out bool isSameNum);
-                    blocks[i, j].target = positions[newX, newY]; //实现动画
-                    blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
-                    blocks[newX, newY].gameObject.name = "block" + newX + newY;
-                    blocks[newX, newY].number = blocks[i, j].number;
-                    Destroy(blocks[i, j].gameObject);
-                    blocks[i, j] = null;
-                    //StartCoroutine(blocks[i,j].MoveToTargetIE(positions[newX, newY]));
-                    // if (isSameNum)
-                    // {
-                    //     blocks[newX, newY - 1].number *= 2;
-                    //     //Destroy(blocks[newX, newY].gameObject);
-                    // }
+                    if (newX!=i||newY!=j||isSameNum)
+                    {
+                        blocks[i, j].target = positions[newX, newY]; //实现动画
+                        blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                        blocks[newX, newY].gameObject.name = "block" + newX + newY;
+                        blocks[newX, newY].number = blocks[i, j].number;
+                        Destroy(blocks[i, j].gameObject);
+                        blocks[i, j] = null;
+                        //StartCoroutine(blocks[i,j].MoveToTargetIE(positions[newX, newY]));
+                        if (isSameNum)
+                        {
+                            blocks[newX, newY - 1].number *= 2;
+                            Destroy(blocks[newX, newY].gameObject);
+                            blocks[newX, newY] = null;
+                        }
+                    }
+                    
+                    
                 }
             }
         }
