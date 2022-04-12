@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class control : MonoBehaviour
 {
     public block block;
@@ -16,15 +15,12 @@ public class control : MonoBehaviour
     private bool Right;
     private bool Test;
 
-    void Start()
+    private void Start()
     {
-
         InitialPositions();
-
     }
 
-
-    void Update()
+    private void Update()
     {
         Up = Input.GetButton("Up");
         Down = Input.GetButtonDown("Down");
@@ -35,8 +31,8 @@ public class control : MonoBehaviour
         {
             InsBlock();
         }
-        MoveBlock();
 
+        MoveBlock();
     }
 
     //生成新的方块
@@ -46,6 +42,7 @@ public class control : MonoBehaviour
         {
             return;
         }
+
         int x = UnityEngine.Random.Range(0, 4);
         int y = UnityEngine.Random.Range(0, 4);
         while (blocks[x, y] != null)
@@ -53,10 +50,12 @@ public class control : MonoBehaviour
             x = UnityEngine.Random.Range(0, 4);
             y = UnityEngine.Random.Range(0, 4);
         }
+
         blocks[x, y] = Instantiate(block, positions[x, y], Quaternion.identity);
         blocks[x, y].gameObject.name = "block" + x + y;
         blocks[x, y].number = initialNumRange[UnityEngine.Random.Range(0, initialNumRange.Length)];
     }
+
     //判断是否满了
     private bool IsFull()
     {
@@ -70,8 +69,10 @@ public class control : MonoBehaviour
                 }
             }
         }
+
         return true;
     }
+
     //判断是否可以移动,true可以移动，false不可以移动
     private bool AroundIsNull(int x, int y, Direction direction)
     {
@@ -79,10 +80,12 @@ public class control : MonoBehaviour
         {
             throw new Exception("超出范围");
         }
+
         if (blocks[x, y] == null)
         {
             throw new Exception("本身为空");
         }
+
         switch (direction)
         {
             case Direction.Up:
@@ -90,36 +93,45 @@ public class control : MonoBehaviour
                 {
                     return true;
                 }
+
                 if (y == 0)
                     return false;
                 break;
+
             case Direction.Down:
                 if (y < 3 && blocks[x, y + 1] == null)
                 {
                     return true;
                 }
+
                 if (y == 3)
                     return false;
                 break;
+
             case Direction.Left:
                 if (x > 0 && blocks[x - 1, y] == null)
                 {
                     return true;
                 }
+
                 if (x == 0)
                     return false;
                 break;
+
             case Direction.Right:
                 if (x < 3 && blocks[x + 1, y] == null)
                 {
                     return true;
                 }
+
                 if (x == 3)
                     return false;
                 break;
         }
+
         return false;
     }
+
     //判断移动位置
     private void MovePosition(int x, int y, Direction direction, out int newX, out int newY, out bool isSameNum)
     {
@@ -127,13 +139,15 @@ public class control : MonoBehaviour
         {
             throw new Exception("超出范围");
         }
+
         if (blocks[x, y] == null)
         {
             throw new Exception("本身为空");
         }
-        newX = 0;//新的x坐标
-        newY = 0;//新的y坐标
-        isSameNum = false;//此方向方块是否相同
+
+        newX = 0; //新的x坐标
+        newY = 0; //新的y坐标
+        isSameNum = false; //此方向方块是否相同
         switch (direction)
         {
             case Direction.Up:
@@ -145,6 +159,7 @@ public class control : MonoBehaviour
                         newY = y - i;
                         break;
                     }
+
                     if (blocks[x, y - i - 1] != null)
                     {
                         newY = y - i;
@@ -152,12 +167,15 @@ public class control : MonoBehaviour
                         {
                             isSameNum = true;
                         }
+
                         break;
                     }
                 }
+
                 break;
         }
     }
+
     //移动方块
     private void MoveBlock()
     {
@@ -171,21 +189,24 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
+
                     MovePosition(i, j, Direction.Up, out int newX, out int newY, out bool isSameNum);
-                    blocks[i, j].target = positions[newX, newY];//实现动画
-                    blocks[newX,newY]=Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                    blocks[i, j].target = positions[newX, newY]; //实现动画
+                    blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
                     blocks[newX, newY].gameObject.name = "block" + newX + newY;
                     blocks[newX, newY].number = blocks[i, j].number;
                     Destroy(blocks[i, j].gameObject);
+                    blocks[i, j] = null;
                     //StartCoroutine(blocks[i,j].MoveToTargetIE(positions[newX, newY]));
-                    if (isSameNum)
-                    {
-                        blocks[newX, newY - 1].number *= 2;
-                        //Destroy(blocks[newX, newY].gameObject);
-                    }
+                    // if (isSameNum)
+                    // {
+                    //     blocks[newX, newY - 1].number *= 2;
+                    //     //Destroy(blocks[newX, newY].gameObject);
+                    // }
                 }
             }
         }
+
         if (Down)
         {
             for (int i = 0; i < 4; i++)
@@ -196,6 +217,7 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
+
                     if (AroundIsNull(i, j, Direction.Down))
                     {
                         blocks[i, j].target = positions[i, j + 1];
@@ -204,11 +226,11 @@ public class control : MonoBehaviour
                         blocks[i, j + 1].number = blocks[i, j].number;
                         //blocks[i, j + 1] = blocks[i, j].Clone() as block;
                         Destroy(blocks[i, j].gameObject);
-
                     }
                 }
             }
         }
+
         if (Left)
         {
             for (int i = 0; i < 4; i++)
@@ -219,6 +241,7 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
+
                     if (AroundIsNull(i, j, Direction.Left))
                     {
                         blocks[i, j].target = positions[i - 1, j];
@@ -227,11 +250,11 @@ public class control : MonoBehaviour
                         blocks[i - 1, j].number = blocks[i, j].number;
                         //blocks[i - 1, j] = blocks[i, j].Clone() as block;
                         Destroy(blocks[i, j].gameObject);
-
                     }
                 }
             }
         }
+
         if (Right)
         {
             for (int i = 3; i >= 0; i--)
@@ -242,6 +265,7 @@ public class control : MonoBehaviour
                     {
                         continue;
                     }
+
                     if (AroundIsNull(i, j, Direction.Right))
                     {
                         blocks[i, j].target = positions[i + 1, j];
@@ -250,12 +274,10 @@ public class control : MonoBehaviour
                         blocks[i + 1, j].number = blocks[i, j].number;
                         //blocks[i + 1, j] = blocks[i, j].Clone() as block;
                         Destroy(blocks[i, j].gameObject);
-
                     }
                 }
             }
         }
-
     }
 
     //初始化所有位置
