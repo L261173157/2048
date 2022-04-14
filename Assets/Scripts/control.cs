@@ -6,9 +6,10 @@ using UnityEngine;
 public class control : MonoBehaviour
 {
     public block block;
+    public int score;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] { 2, 4 };
+    private int[] initialNumRange = new int[] {2, 4};
     private bool Up;
     private bool Down;
     private bool Left;
@@ -18,6 +19,8 @@ public class control : MonoBehaviour
     private void Start()
     {
         InitialPositions();
+        PlayerPrefs.GetInt("score", 0);
+        Debug.Log(score);
     }
 
     private void Update()
@@ -29,6 +32,7 @@ public class control : MonoBehaviour
         StartGame = Input.GetButtonDown("Start");
         if (StartGame)
         {
+            score = 0;
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
@@ -45,6 +49,7 @@ public class control : MonoBehaviour
         }
 
         MoveBlock();
+        SaveData(); 
     }
 
     //生成新的方块
@@ -93,7 +98,7 @@ public class control : MonoBehaviour
         {
             for (int j = 0; j < 4; j++)
             {
-                if (blocks[i,j]!=null&&blocks[i, j].number == 2048)
+                if (blocks[i, j] != null && blocks[i, j].number == 2048)
                 {
                     return true;
                 }
@@ -165,6 +170,7 @@ public class control : MonoBehaviour
             Debug.Log("很遗憾，你输了！");
         }
 
+        Debug.Log("游戏分数：" + score);
         InsBlock();
     }
 
@@ -311,11 +317,12 @@ public class control : MonoBehaviour
                         blocks[newX, newY - 1].number *= 2;
                         Destroy(blocks[newX, newY].gameObject);
                         blocks[newX, newY] = null;
+                        score++;
                     }
                 }
             }
+
             Invoke(nameof(Judge), 0.5f);
-            
         }
 
         if (Down)
@@ -345,6 +352,7 @@ public class control : MonoBehaviour
                         blocks[newX, newY + 1].number *= 2;
                         Destroy(blocks[newX, newY].gameObject);
                         blocks[newX, newY] = null;
+                        score++;
                     }
                 }
             }
@@ -379,6 +387,7 @@ public class control : MonoBehaviour
                         blocks[newX - 1, newY].number *= 2;
                         Destroy(blocks[newX, newY].gameObject);
                         blocks[newX, newY] = null;
+                        score++;
                     }
                 }
             }
@@ -413,6 +422,7 @@ public class control : MonoBehaviour
                         blocks[newX + 1, newY].number *= 2;
                         Destroy(blocks[newX, newY].gameObject);
                         blocks[newX, newY] = null;
+                        score++;
                     }
                 }
             }
@@ -440,5 +450,13 @@ public class control : MonoBehaviour
         positions[1, 3] = new Vector3(-0.6f, -1.8f, 0);
         positions[2, 3] = new Vector3(0.6f, -1.8f, 0);
         positions[3, 3] = new Vector3(1.8f, -1.8f, 0);
+    }
+
+    private void SaveData()
+    {
+        if (Up||Down||Left||Right||StartGame)
+        {
+            PlayerPrefs.SetInt("score", score);
+        }
     }
 }

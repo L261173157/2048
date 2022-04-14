@@ -28,13 +28,13 @@ public class block : MonoBehaviour, ICloneable
     //方块的目标位置
     public Vector3 target;
 
-    private int[] initialNumRange = new int[] { 2, 4 };
+    private readonly int[] initialNumRange = new int[] { 2, 4 };
 
     private void Start()
     {
         sprites = Resources.LoadAll<Sprite>("image");
         SpriteRenderer = GetComponent<SpriteRenderer>();
-        //number = initialNumRange[UnityEngine.Random.Range(0, initialNumRange.Length)];
+        // number = initialNumRange[UnityEngine.Random.Range(0, initialNumRange.Length)];
         target = transform.position;
     }
 
