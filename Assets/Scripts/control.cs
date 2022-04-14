@@ -8,12 +8,12 @@ public class control : MonoBehaviour
     public block block;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] {2, 4};
+    private int[] initialNumRange = new int[] { 2, 4 };
     private bool Up;
     private bool Down;
     private bool Left;
     private bool Right;
-    private bool Test;
+    private bool StartGame;
 
     private void Start()
     {
@@ -22,13 +22,25 @@ public class control : MonoBehaviour
 
     private void Update()
     {
-        Up = Input.GetButton("Up");
+        Up = Input.GetButtonDown("Up");
         Down = Input.GetButtonDown("Down");
         Left = Input.GetButtonDown("Left");
         Right = Input.GetButtonDown("Right");
-        Test = Input.GetButtonDown("Test");
-        if (Test)
+        StartGame = Input.GetButtonDown("Start");
+        if (StartGame)
         {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (blocks[i, j] != null)
+                    {
+                        Destroy(blocks[i, j].gameObject);
+                        blocks[i, j] = null;
+                    }
+                }
+            }
+
             InsBlock();
         }
 
@@ -73,63 +85,87 @@ public class control : MonoBehaviour
         return true;
     }
 
-    //判断是否可以移动,true可以移动，false不可以移动
-    private bool AroundIsNull(int x, int y, Direction direction)
+
+    //判断是否胜利
+    private bool IsVictory()
     {
-        if (x < 0 || x > 3 || y < 0 || y > 3)
+        for (int i = 0; i < 4; i++)
         {
-            throw new Exception("超出范围");
-        }
-
-        if (blocks[x, y] == null)
-        {
-            throw new Exception("本身为空");
-        }
-
-        switch (direction)
-        {
-            case Direction.Up:
-                if (y > 0 && blocks[x, y - 1] == null)
+            for (int j = 0; j < 4; j++)
+            {
+                if (blocks[i,j]!=null&&blocks[i, j].number == 2048)
                 {
                     return true;
                 }
-
-                if (y == 0)
-                    return false;
-                break;
-
-            case Direction.Down:
-                if (y < 3 && blocks[x, y + 1] == null)
-                {
-                    return true;
-                }
-
-                if (y == 3)
-                    return false;
-                break;
-
-            case Direction.Left:
-                if (x > 0 && blocks[x - 1, y] == null)
-                {
-                    return true;
-                }
-
-                if (x == 0)
-                    return false;
-                break;
-
-            case Direction.Right:
-                if (x < 3 && blocks[x + 1, y] == null)
-                {
-                    return true;
-                }
-
-                if (x == 3)
-                    return false;
-                break;
+            }
         }
 
         return false;
+    }
+
+    //判断是否失败
+    private bool IsGameOver()
+    {
+        if (IsFull())
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (blocks[i, j] != null)
+                    {
+                        if (i == 0 && blocks[i, j].number == blocks[i + 1, j].number)
+                        {
+                            return false;
+                        }
+
+                        if (i == 3 && blocks[i, j].number == blocks[i - 1, j].number)
+                        {
+                            return false;
+                        }
+
+                        if (j == 0 && blocks[i, j].number == blocks[i, j + 1].number)
+                        {
+                            return false;
+                        }
+
+                        if (j == 3 && blocks[i, j].number == blocks[i, j - 1].number)
+                        {
+                            return false;
+                        }
+
+                        if ((i == 1 || i == 2) && (j == 1 || j == 2))
+                        {
+                            if (blocks[i, j].number == blocks[i - 1, j].number ||
+                                blocks[i, j].number == blocks[i + 1, j].number ||
+                                blocks[i, j].number == blocks[i, j - 1].number ||
+                                blocks[i, j].number == blocks[i, j + 1].number)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void Judge()
+    {
+        if (IsVictory())
+        {
+            Debug.Log("恭喜你，你赢了！");
+        }
+        else if (IsGameOver())
+        {
+            Debug.Log("很遗憾，你输了！");
+        }
+
+        InsBlock();
     }
 
     //判断移动位置
@@ -173,6 +209,75 @@ public class control : MonoBehaviour
                 }
 
                 break;
+            case Direction.Down:
+                newX = x;
+                for (int i = 0; i <= y + 3; i++)
+                {
+                    if (y + i + 1 > 3)
+                    {
+                        newY = y + i;
+                        break;
+                    }
+
+                    if (blocks[x, y + i + 1] != null)
+                    {
+                        newY = y + i;
+                        if (blocks[x, y + i + 1].number == blocks[x, y].number)
+                        {
+                            isSameNum = true;
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            case Direction.Left:
+                newY = y;
+                for (int i = 0; i <= x; i++)
+                {
+                    if (x - i - 1 < 0)
+                    {
+                        newX = x - i;
+                        break;
+                    }
+
+                    if (blocks[x - i - 1, y] != null)
+                    {
+                        newX = x - i;
+                        if (blocks[x - i - 1, y].number == blocks[x, y].number)
+                        {
+                            isSameNum = true;
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            case Direction.Right:
+                newY = y;
+                for (int i = 0; i <= x + 3; i++)
+                {
+                    if (x + i + 1 > 3)
+                    {
+                        newX = x + i;
+                        break;
+                    }
+
+                    if (blocks[x + i + 1, y] != null)
+                    {
+                        newX = x + i;
+                        if (blocks[x + i + 1, y].number == blocks[x, y].number)
+                        {
+                            isSameNum = true;
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
         }
     }
 
@@ -191,7 +296,7 @@ public class control : MonoBehaviour
                     }
 
                     MovePosition(i, j, Direction.Up, out int newX, out int newY, out bool isSameNum);
-                    if (newX!=i||newY!=j||isSameNum)
+                    if (newX != i || newY != j)
                     {
                         blocks[i, j].target = positions[newX, newY]; //实现动画
                         blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
@@ -199,18 +304,18 @@ public class control : MonoBehaviour
                         blocks[newX, newY].number = blocks[i, j].number;
                         Destroy(blocks[i, j].gameObject);
                         blocks[i, j] = null;
-                        //StartCoroutine(blocks[i,j].MoveToTargetIE(positions[newX, newY]));
-                        if (isSameNum)
-                        {
-                            blocks[newX, newY - 1].number *= 2;
-                            Destroy(blocks[newX, newY].gameObject);
-                            blocks[newX, newY] = null;
-                        }
                     }
-                    
-                    
+
+                    if (isSameNum)
+                    {
+                        blocks[newX, newY - 1].number *= 2;
+                        Destroy(blocks[newX, newY].gameObject);
+                        blocks[newX, newY] = null;
+                    }
                 }
             }
+            Invoke(nameof(Judge), 0.5f);
+            
         }
 
         if (Down)
@@ -224,17 +329,27 @@ public class control : MonoBehaviour
                         continue;
                     }
 
-                    if (AroundIsNull(i, j, Direction.Down))
+                    MovePosition(i, j, Direction.Down, out int newX, out int newY, out bool isSameNum);
+                    if (newX != i || newY != j)
                     {
-                        blocks[i, j].target = positions[i, j + 1];
-                        blocks[i, j + 1] = Instantiate(blocks[i, j], positions[i, j + 1], Quaternion.identity);
-                        blocks[i, j + 1].gameObject.name = "block" + i + (j + 1);
-                        blocks[i, j + 1].number = blocks[i, j].number;
-                        //blocks[i, j + 1] = blocks[i, j].Clone() as block;
+                        blocks[i, j].target = positions[newX, newY]; //实现动画
+                        blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                        blocks[newX, newY].gameObject.name = "block" + newX + newY;
+                        blocks[newX, newY].number = blocks[i, j].number;
                         Destroy(blocks[i, j].gameObject);
+                        blocks[i, j] = null;
+                    }
+
+                    if (isSameNum)
+                    {
+                        blocks[newX, newY + 1].number *= 2;
+                        Destroy(blocks[newX, newY].gameObject);
+                        blocks[newX, newY] = null;
                     }
                 }
             }
+
+            Invoke(nameof(Judge), 0.5f);
         }
 
         if (Left)
@@ -248,17 +363,27 @@ public class control : MonoBehaviour
                         continue;
                     }
 
-                    if (AroundIsNull(i, j, Direction.Left))
+                    MovePosition(i, j, Direction.Left, out int newX, out int newY, out bool isSameNum);
+                    if (newX != i || newY != j)
                     {
-                        blocks[i, j].target = positions[i - 1, j];
-                        blocks[i - 1, j] = Instantiate(blocks[i, j], positions[i - 1, j], Quaternion.identity);
-                        blocks[i - 1, j].gameObject.name = "block" + (i - 1) + j;
-                        blocks[i - 1, j].number = blocks[i, j].number;
-                        //blocks[i - 1, j] = blocks[i, j].Clone() as block;
+                        blocks[i, j].target = positions[newX, newY]; //实现动画
+                        blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                        blocks[newX, newY].gameObject.name = "block" + newX + newY;
+                        blocks[newX, newY].number = blocks[i, j].number;
                         Destroy(blocks[i, j].gameObject);
+                        blocks[i, j] = null;
+                    }
+
+                    if (isSameNum)
+                    {
+                        blocks[newX - 1, newY].number *= 2;
+                        Destroy(blocks[newX, newY].gameObject);
+                        blocks[newX, newY] = null;
                     }
                 }
             }
+
+            Invoke(nameof(Judge), 0.5f);
         }
 
         if (Right)
@@ -272,17 +397,27 @@ public class control : MonoBehaviour
                         continue;
                     }
 
-                    if (AroundIsNull(i, j, Direction.Right))
+                    MovePosition(i, j, Direction.Right, out int newX, out int newY, out bool isSameNum);
+                    if (newX != i || newY != j)
                     {
-                        blocks[i, j].target = positions[i + 1, j];
-                        blocks[i + 1, j] = Instantiate(blocks[i, j], positions[i + 1, j], Quaternion.identity);
-                        blocks[i + 1, j].gameObject.name = "block" + (i + 1) + j;
-                        blocks[i + 1, j].number = blocks[i, j].number;
-                        //blocks[i + 1, j] = blocks[i, j].Clone() as block;
+                        blocks[i, j].target = positions[newX, newY]; //实现动画
+                        blocks[newX, newY] = Instantiate(blocks[i, j], positions[newX, newY], Quaternion.identity);
+                        blocks[newX, newY].gameObject.name = "block" + newX + newY;
+                        blocks[newX, newY].number = blocks[i, j].number;
                         Destroy(blocks[i, j].gameObject);
+                        blocks[i, j] = null;
+                    }
+
+                    if (isSameNum)
+                    {
+                        blocks[newX + 1, newY].number *= 2;
+                        Destroy(blocks[newX, newY].gameObject);
+                        blocks[newX, newY] = null;
                     }
                 }
             }
+
+            Invoke(nameof(Judge), 0.5f);
         }
     }
 
