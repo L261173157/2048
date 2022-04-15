@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class control : MonoBehaviour
@@ -9,12 +10,14 @@ public class control : MonoBehaviour
     public int score;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] { 2, 4 };
+    private int[] initialNumRange = new int[] {2, 4};
     private bool Up;
     private bool Down;
     private bool Left;
     private bool Right;
     private bool StartGame;
+    private blockToSave blockToSave = new blockToSave();
+    private const string filePath = "save.json";
 
     private void Start()
     {
@@ -48,7 +51,6 @@ public class control : MonoBehaviour
         }
 
         MoveBlock();
-        SaveData();
     }
 
     //生成新的方块
@@ -171,6 +173,7 @@ public class control : MonoBehaviour
 
         Debug.Log("游戏分数：" + score.ToString());
         InsBlock();
+        SaveData();
     }
 
     //判断移动位置
@@ -453,15 +456,51 @@ public class control : MonoBehaviour
 
     private void SaveData()
     {
-        if (Up || Down || Left || Right)
+        // if (Up || Down || Left || Right)
+        // {
+        //     PlayerPrefs.SetInt("score", score);
+        // }
+
+        blockToSave.score = score;
+        blockToSave.number.Clear();
+        foreach (var block in blocks)
         {
-            PlayerPrefs.SetInt("score", score);
+            if (block == null)
+            {
+                blockToSave.number.Add(0);
+                continue;
+            }
+
+            blockToSave.number.Add(block.number);
         }
+
+        string json = JsonUtility.ToJson(blockToSave);
+
+        File.WriteAllText(filePath, json);
     }
 
     private void LoadData()
     {
-        score = PlayerPrefs.GetInt("score");
-        Debug.Log("游戏分数：" + score.ToString());
+        // score = PlayerPrefs.GetInt("score");
+        if (File.Exists(filePath))
+        {
+            string json = File.ReadAllText(filePath);
+            blockToSave = JsonUtility.FromJson<blockToSave>(json);
+            score = blockToSave.score;
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (blockToSave.number[i * 4 + j] == 0)
+                    {
+                        continue;
+                    }
+
+                    blocks[i, j] = Instantiate(block, positions[i, j], Quaternion.identity);
+                    blocks[i, j].number = blockToSave.number[i * 4 + j];
+                    blocks[i, j].gameObject.name = "block" + i + j;
+                }
+            }
+        }
     }
 }
