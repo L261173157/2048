@@ -9,7 +9,7 @@ public class control : MonoBehaviour
     public int score;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] {2, 4};
+    private int[] initialNumRange = new int[] { 2, 4 };
     private bool Up;
     private bool Down;
     private bool Left;
@@ -19,8 +19,7 @@ public class control : MonoBehaviour
     private void Start()
     {
         InitialPositions();
-        PlayerPrefs.GetInt("score", 0);
-        Debug.Log(score);
+        LoadData();
     }
 
     private void Update()
@@ -49,7 +48,7 @@ public class control : MonoBehaviour
         }
 
         MoveBlock();
-        SaveData(); 
+        SaveData();
     }
 
     //生成新的方块
@@ -170,7 +169,7 @@ public class control : MonoBehaviour
             Debug.Log("很遗憾，你输了！");
         }
 
-        Debug.Log("游戏分数：" + score);
+        Debug.Log("游戏分数：" + score.ToString());
         InsBlock();
     }
 
@@ -454,9 +453,15 @@ public class control : MonoBehaviour
 
     private void SaveData()
     {
-        if (Up||Down||Left||Right||StartGame)
+        if (Up || Down || Left || Right)
         {
             PlayerPrefs.SetInt("score", score);
         }
+    }
+
+    private void LoadData()
+    {
+        score = PlayerPrefs.GetInt("score");
+        Debug.Log("游戏分数：" + score.ToString());
     }
 }
