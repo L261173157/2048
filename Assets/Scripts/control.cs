@@ -2,20 +2,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class control : MonoBehaviour
 {
     public block block;
-    public int score;
+    public TextMeshProUGUI scoreText;
+    private int score;
     private block[,] blocks = new block[4, 4];
     private Vector3[,] positions = new Vector3[4, 4];
-    private int[] initialNumRange = new int[] {2, 4};
+    private int[] initialNumRange = new int[] { 2, 4 };
     private bool Up;
     private bool Down;
     private bool Left;
     private bool Right;
-    private bool StartGame;
     private blockToSave blockToSave = new blockToSave();
     private const string filePath = "save.json";
 
@@ -31,26 +33,27 @@ public class control : MonoBehaviour
         Down = Input.GetButtonDown("Down");
         Left = Input.GetButtonDown("Left");
         Right = Input.GetButtonDown("Right");
-        StartGame = Input.GetButtonDown("Start");
-        if (StartGame)
+        MoveBlock();
+    }
+
+    public void NewGame()
+    {
+        score = 0;
+        scoreText.text = score.ToString();
+        for (int i = 0; i < 4; i++)
         {
-            score = 0;
-            for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
             {
-                for (int j = 0; j < 4; j++)
+                if (blocks[i, j] != null)
                 {
-                    if (blocks[i, j] != null)
-                    {
-                        Destroy(blocks[i, j].gameObject);
-                        blocks[i, j] = null;
-                    }
+                    Destroy(blocks[i, j].gameObject);
+                    blocks[i, j] = null;
                 }
             }
-
-            InsBlock();
         }
 
-        MoveBlock();
+        InsBlock();
+        SaveData();
     }
 
     //生成新的方块
@@ -162,16 +165,18 @@ public class control : MonoBehaviour
 
     private void Judge()
     {
+        Debug.Log("游戏分数：" + score.ToString());
+        scoreText.text = score.ToString();
         if (IsVictory())
         {
             Debug.Log("恭喜你，你赢了！");
+            scoreText.text = "Win";
         }
         else if (IsGameOver())
         {
             Debug.Log("很遗憾，你输了！");
+            scoreText.text = "Lose";
         }
-
-        Debug.Log("游戏分数：" + score.ToString());
         InsBlock();
         SaveData();
     }
@@ -324,7 +329,7 @@ public class control : MonoBehaviour
                 }
             }
 
-            Invoke(nameof(Judge), 0.5f);
+            Invoke(nameof(Judge), 0.2f);
         }
 
         if (Down)
@@ -359,7 +364,7 @@ public class control : MonoBehaviour
                 }
             }
 
-            Invoke(nameof(Judge), 0.5f);
+            Invoke(nameof(Judge), 0.2f);
         }
 
         if (Left)
@@ -394,7 +399,7 @@ public class control : MonoBehaviour
                 }
             }
 
-            Invoke(nameof(Judge), 0.5f);
+            Invoke(nameof(Judge), 0.2f);
         }
 
         if (Right)
@@ -429,7 +434,7 @@ public class control : MonoBehaviour
                 }
             }
 
-            Invoke(nameof(Judge), 0.5f);
+            Invoke(nameof(Judge), 0.2f);
         }
     }
 
@@ -456,10 +461,6 @@ public class control : MonoBehaviour
 
     private void SaveData()
     {
-        // if (Up || Down || Left || Right)
-        // {
-        //     PlayerPrefs.SetInt("score", score);
-        // }
 
         blockToSave.score = score;
         blockToSave.number.Clear();
@@ -481,12 +482,12 @@ public class control : MonoBehaviour
 
     private void LoadData()
     {
-        // score = PlayerPrefs.GetInt("score");
         if (File.Exists(filePath))
         {
             string json = File.ReadAllText(filePath);
             blockToSave = JsonUtility.FromJson<blockToSave>(json);
             score = blockToSave.score;
+            scoreText.text = score.ToString();
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
